@@ -2,6 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import {
   AppRegistry,
+  Button,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -31,13 +32,19 @@ export default function App() {
     })();
   }, []);
 
-  const { refetch, data } =
+  const { refetch, clear, data } =
     useAsyncStorageChange<NotificationPayload[]>("@notifications");
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Notifications: {data?.length}</Text>
-      <Text onPress={refetch}>Reload</Text>
+      <View style={styles.buttonWrapper}>
+        <View style={styles.button}>
+          <Button title="Reload" onPress={refetch} />
+        </View>
+        <View style={styles.button}>
+          <Button title="Clear" onPress={clear} />
+        </View>
+      </View>
       <ScrollView>
         {data?.map((notification) => (
           <View key={notification.time} style={styles.row}>
@@ -75,12 +82,21 @@ AppRegistry.registerHeadlessTask(
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 50,
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
   row: {
     paddingBottom: 10,
+  },
+  button: {
+    margin: 30,
+    flex: 1,
+  },
+  buttonWrapper: {
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
 });

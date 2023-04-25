@@ -30,6 +30,14 @@ export const getData = async (key: string) => {
   }
 };
 
+export const removeData = async (key: string) => {
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch (e) {
+    console.error("Error removing value", e);
+  }
+};
+
 export const useAsyncStorageChange = <T>(key: string) => {
   const [data, setData] = useState<T | null>(null);
 
@@ -41,9 +49,14 @@ export const useAsyncStorageChange = <T>(key: string) => {
     setData(value);
   }, [key, setData]);
 
+  const clear = useCallback(() => {
+    removeData(key);
+    setData(null);
+  }, [setData, key]);
+
   useEffect(() => {
     refetch();
   }, [refetch]);
 
-  return { refetch, data };
+  return { refetch, clear, data };
 };

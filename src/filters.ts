@@ -1,36 +1,10 @@
-export const filterNotification = (notification: NotificationPayload) => {
-  // filter out notifications that match the string or regex
-  const matches = FILTERS.filter((filter) => {
-    if (filter.app instanceof RegExp) {
-      return filter.app.test(notification.app);
-    } else {
-      return filter.app === notification.app;
-    }
-    if (filter.name) {
-      if (filter.name instanceof RegExp) {
-        return filter.name.test(notification.title);
-      } else {
-        return filter.name === notification.title;
-      }
-    }
-    if (filter.text) {
-      if (filter.text instanceof RegExp) {
-        return filter.text.test(notification.text);
-      } else {
-        return filter.text === notification.text;
-      }
-    }
-  });
-
-  return matches.length > 0;
-};
+import { NotificationPayload } from "./notificationHandler";
 
 interface Filter {
-  app: string | Regex;
-  name?: string | Regex;
-  text?: string | Regex;
+  app: string | RegExp;
+  name?: string | RegExp;
+  text?: string | RegExp;
 }
-const FILTERS: Filter[] = [DEVICE_PAIRING];
 
 // device paring from messaging
 const DEVICE_PAIRING = {
@@ -64,4 +38,37 @@ const SYSTEM = {
 
 const CLASSDOJO = {
   app: "com.classdojo.android",
+};
+
+const FILTERS: Filter[] = [
+  DEVICE_PAIRING,
+  SLACK,
+  TELEGRAM,
+  GMAIL,
+  WHATSAPP,
+  CALENDAR,
+  SYSTEM,
+  CLASSDOJO,
+];
+
+export const filterNotification = (notification: NotificationPayload) => {
+  // filter out notifications that match the string or regex
+  const matches = FILTERS.filter((filter) => {
+    // if the notification matches any of the properties in the filter, return true
+    return (
+      matchesFilter(notification.app, filter.app) ||
+      (filter.name && matchesFilter(notification.title, filter.name)) ||
+      (filter.text && matchesFilter(notification.text, filter.text))
+    );
+  });
+
+  return matches.length > 0;
+};
+
+const matchesFilter = (value: string, filter: string | RegExp) => {
+  if (typeof filter === "string") {
+    return value.includes(filter);
+  } else {
+    return filter.test(value);
+  }
 };
