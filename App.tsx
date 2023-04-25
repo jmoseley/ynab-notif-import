@@ -37,9 +37,24 @@ export default function App() {
       <Text onPress={refetch}>Reload</Text>
       <ScrollView>
         {data?.map((notification) => (
-          <Text key={notification.time}>
-            {notification.title} - {notification.text}
-          </Text>
+          <View key={notification.time} style={styles.row}>
+            {notification.app && <Text>{notification.app}</Text>}
+            {notification.title && (
+              <Text>{`Title: ${notification.title}`}</Text>
+            )}
+            {notification.text && <Text>{`Text: ${notification.text}`}</Text>}
+            {notification.subText && (
+              <Text>{`SubText: ${notification.subText}`}</Text>
+            )}
+            {notification.groupedMessages.length > 0 &&
+              notification.groupedMessages.map((message, idx) => (
+                <View style={styles.row} key={idx}>
+                  <Text>{idx}</Text>
+                  {message.title && <Text>{message.title}</Text>}
+                  {message.text && <Text>{message.text}</Text>}
+                </View>
+              ))}
+          </View>
         ))}
       </ScrollView>
       <StatusBar style="auto" />
@@ -61,5 +76,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  row: {
+    paddingBottom: 10,
   },
 });
