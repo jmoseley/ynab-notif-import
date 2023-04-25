@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const listeners: { key: string; listener: (value: any) => void }[] = [];
 
@@ -35,12 +35,15 @@ export const useAsyncStorageChange = <T>(key: string) => {
 
   listeners.push({ key, listener: setData });
 
-  const refetch = async () => {
+  const refetch = useCallback(async () => {
+    console.log("refetching", key);
     const value = await getData(key);
     setData(value);
-  };
+  }, [key, setData]);
 
-  refetch();
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   return { refetch, data };
 };

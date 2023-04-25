@@ -1,6 +1,13 @@
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { AppRegistry, StyleSheet, Text, View } from "react-native";
+import {
+  AppRegistry,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import RNAndroidNotificationListener, {
   RNAndroidNotificationListenerHeadlessJsName,
 } from "react-native-android-notification-listener";
@@ -25,22 +32,27 @@ export default function App() {
     useAsyncStorageChange<Notification[]>("@notifications");
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text>Notifications: {data?.length}</Text>
       <Text onPress={refetch}>Reload</Text>
-      {data?.map((notification) => (
-        <Text key={notification.time}>
-          {notification.title} - {notification.text}
-        </Text>
-      ))}
+      <ScrollView>
+        {data?.map((notification) => (
+          <Text key={notification.time}>
+            {notification.title} - {notification.text}
+          </Text>
+        ))}
+      </ScrollView>
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaView>
   );
 }
 
 AppRegistry.registerHeadlessTask(
   RNAndroidNotificationListenerHeadlessJsName,
-  () => notificationHandler
+  () => {
+    console.log("getting handler");
+    return notificationHandler;
+  }
 );
 
 const styles = StyleSheet.create({
