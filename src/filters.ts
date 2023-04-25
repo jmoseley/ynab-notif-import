@@ -2,14 +2,14 @@ import { NotificationPayload } from "./notificationHandler";
 
 interface Filter {
   app: string | RegExp;
-  name?: string | RegExp;
+  title?: string | RegExp;
   text?: string | RegExp;
 }
 
 // device paring from messaging
 const DEVICE_PAIRING = {
   app: "com.google.android.apps.messaging",
-  name: "Device pairing",
+  title: "Device pairing",
 };
 
 const SLACK = {
@@ -54,11 +54,11 @@ const FILTERS: Filter[] = [
 export const filterNotification = (notification: NotificationPayload) => {
   // filter out notifications that match the string or regex
   const matches = FILTERS.filter((filter) => {
-    // if the notification matches any of the properties in the filter, return true
+    // if the notification matches all of the properties in the filter, return true
     return (
-      matchesFilter(notification.app, filter.app) ||
-      (filter.name && matchesFilter(notification.title, filter.name)) ||
-      (filter.text && matchesFilter(notification.text, filter.text))
+      matchesFilter(notification.app, filter.app) &&
+      (!filter.title || matchesFilter(notification.title, filter.title)) &&
+      (!filter.text || matchesFilter(notification.text, filter.text))
     );
   });
 
