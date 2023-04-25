@@ -12,7 +12,10 @@ import RNAndroidNotificationListener, {
   RNAndroidNotificationListenerHeadlessJsName,
 } from "react-native-android-notification-listener";
 
-import { notificationHandler, Notification } from "./src/notificationHandler";
+import {
+  notificationHandler,
+  NotificationPayload,
+} from "./src/notificationHandler";
 import { useAsyncStorageChange } from "./src/storage";
 
 export default function App() {
@@ -29,7 +32,7 @@ export default function App() {
   }, []);
 
   const { refetch, data } =
-    useAsyncStorageChange<Notification[]>("@notifications");
+    useAsyncStorageChange<NotificationPayload[]>("@notifications");
 
   return (
     <SafeAreaView style={styles.container}>

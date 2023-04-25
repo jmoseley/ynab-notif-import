@@ -1,6 +1,7 @@
+import { filterNotification } from "./filters";
 import { getData, storeData } from "./storage";
 
-export interface Notification {
+export interface NotificationPayload {
   time: string;
   app: string;
   title: string;
@@ -57,20 +58,25 @@ export const notificationHandler = async (params: {
    */
 
   if (notificationStr) {
-    let notification = { text: notificationStr } as Notification;
+    let notification = { text: notificationStr } as NotificationPayload;
     try {
-      notification = JSON.parse(notificationStr) as Notification;
+      notification = JSON.parse(notificationStr) as NotificationPayload;
     } catch (e) {
       console.error("Error parsing notification", e);
     }
     console.info("notification", notification);
+
+    if (filterNotification(notification)) {
+      console.info("Notification filtered");
+      return;
+    }
 
     /**
      * You could store the notifications in an external API.
      * I'm using AsyncStorage in the example project.
      */
     const existingNotifications = ((await getData("@notifications")) ||
-      []) as Notification[];
+      []) as NotificationPayload[];
 
     existingNotifications.push(notification);
 
