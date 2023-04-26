@@ -73,26 +73,3 @@ const matchesFilter = (value: string, filter: string | RegExp) => {
     return filter.test(value);
   }
 };
-
-export const parseNotification = (
-  notification: NotificationPayload
-): Transaction | null => {
-  if (notification.app !== "com.revolut.revolut") {
-    return null;
-  }
-
-  const amountPaid = notification.text.match(/(£|€|$)(\d+\.\d+)/);
-
-  const currency = amountPaid?.[1] || null;
-  const amountStr = amountPaid?.[2] || null;
-  if (!currency || !amountStr || !Currencies.some((c) => c === currency)) {
-    return null;
-  }
-  const amount = parseFloat(amountStr);
-
-  return {
-    date: new Date(parseInt(notification.time)).toISOString(),
-    currency: currency as Currency,
-    amount,
-  };
-};

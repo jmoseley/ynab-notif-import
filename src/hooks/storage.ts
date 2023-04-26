@@ -17,16 +17,17 @@ export const storeData = async <T>(key: string, object: T) => {
   }
 };
 
-export const getData = async (key: string) => {
+export const getData = async <T>(key: string) => {
   try {
     const value = await AsyncStorage.getItem(key);
     if (value !== null) {
-      return JSON.parse(value);
+      return JSON.parse(value) as T;
     } else {
       return null;
     }
   } catch (e) {
     console.error("Error reading value", e);
+    return null;
   }
 };
 
@@ -45,8 +46,8 @@ export const useAsyncStorageChange = <T>(key: string) => {
 
   const refetch = useCallback(async () => {
     console.log("refetching", key);
-    const value = await getData(key);
-    setData(value);
+    const value = await getData<T>(key);
+    setData(value || null);
   }, [key, setData]);
 
   const clear = useCallback(() => {

@@ -21,6 +21,7 @@ import {
 } from "./src/hooks/notificationHandler";
 import { useAsyncStorageChange } from "./src/hooks/storage";
 import YnabConfigurationModal from "./src/components/ynabConfigurationModal";
+import { handleNotification } from "./src/hooks/ynab";
 
 export default function App() {
   useEffect(() => {
@@ -35,8 +36,12 @@ export default function App() {
     })();
   }, []);
 
-  const { refetch, clear, data } =
-    useAsyncStorageChange<NotificationPayload[]>("@notifications");
+  const {
+    refetch,
+    clear,
+    data: notifications,
+    storeValue: storeNotifications,
+  } = useAsyncStorageChange<NotificationPayload[]>("@notifications");
 
   const [configurationModalVisible, setConfigurationModalVisible] =
     useState(false);
@@ -63,11 +68,29 @@ export default function App() {
           />
         </View>
       </View>
-      {/* <View style={{ marginVertical: 10 }}>
-        {client && <Text>{`YNAB is configured`}</Text>}
-      </View> */}
+      <View style={{ ...styles.buttonWrapper, marginVertical: 5 }}>
+        <View style={styles.button}>
+          <Button
+            title="Reprocess Notifications"
+            onPress={async () => {
+              const unhandledNotifications: NotificationPayload[] = [];
+              await Promise.all(
+                notifications?.map(async (notification) => {
+                  const result = await handleNotification(notification);
+                  if (result) {
+                    console.log("notification handled");
+                  } else {
+                    unhandledNotifications.push(notification);
+                  }
+                }) || []
+              );
+              await storeNotifications(unhandledNotifications);
+            }}
+          />
+        </View>
+      </View>
       <ScrollView>
-        {data?.map((notification) => (
+        {notifications?.map((notification) => (
           <View key={notification.time} style={styles.row}>
             {(Object.keys(notification) as (keyof NotificationPayload)[]).map(
               (key) => {

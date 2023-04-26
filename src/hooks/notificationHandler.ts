@@ -1,6 +1,6 @@
-import { filterNotification, parseNotification } from "./filters";
+import { filterNotification } from "./filters";
 import { getData, storeData } from "./storage";
-import { createTransaction } from "./ynab";
+import { handleNotification } from "./ynab";
 
 export interface NotificationPayload {
   time: string;
@@ -70,6 +70,12 @@ export const notificationHandler = async (params: {
       return;
     }
 
+    const handled = await handleNotification(notification);
+    if (handled) {
+      console.info("Notification handled");
+      return;
+    }
+
     /**
      * You could store the notifications in an external API.
      * I'm using AsyncStorage in the example project.
@@ -80,13 +86,5 @@ export const notificationHandler = async (params: {
     existingNotifications.push(notification);
 
     await storeData("@notifications", existingNotifications);
-
-    const transaction = parseNotification(notification);
-    console.info("transaction", transaction);
-    if (!transaction) {
-      console.info("Transaction not parsed");
-      return;
-    }
-    await createTransaction(transaction);
   }
 };
