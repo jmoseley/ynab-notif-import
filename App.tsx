@@ -1,12 +1,14 @@
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   AppRegistry,
   Button,
+  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import RNAndroidNotificationListener, {
@@ -16,8 +18,10 @@ import RNAndroidNotificationListener, {
 import {
   notificationHandler,
   NotificationPayload,
-} from "./src/notificationHandler";
-import { useAsyncStorageChange } from "./src/storage";
+} from "./src/hooks/notificationHandler";
+import { useAsyncStorageChange } from "./src/hooks/storage";
+import { useYnab } from "./src/hooks/ynab";
+import YnabAccessTokenModal from "./src/components/ynabAccessTokenModal";
 
 export default function App() {
   useEffect(() => {
@@ -35,15 +39,32 @@ export default function App() {
   const { refetch, clear, data } =
     useAsyncStorageChange<NotificationPayload[]>("@notifications");
 
+  const { client, setAccessToken } = useYnab();
+  const [accessTokenModalVisible, setAccessTokenModalVisible] = useState(false);
+
   return (
     <SafeAreaView style={styles.container}>
+      <YnabAccessTokenModal
+        accessTokenModalVisible={accessTokenModalVisible}
+        setAccessTokenModalVisible={setAccessTokenModalVisible}
+        setAccessToken={setAccessToken}
+      />
       <View style={styles.buttonWrapper}>
         <View style={styles.button}>
-          <Button title="Reload" onPress={refetch} />
+          <Button title="Reload Notifications" onPress={refetch} />
         </View>
         <View style={styles.button}>
-          <Button title="Clear" onPress={clear} />
+          <Button title="Clear Notifications" onPress={clear} />
         </View>
+        <View style={styles.button}>
+          <Button
+            title="Set YNAB Access Token"
+            onPress={() => setAccessTokenModalVisible(true)}
+          />
+        </View>
+      </View>
+      <View style={{ marginVertical: 10 }}>
+        {client && <Text>{`YNAB is configured`}</Text>}
       </View>
       <ScrollView>
         {data?.map((notification) => (
@@ -85,6 +106,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     flex: 1,
     backgroundColor: "#fff",
+    marginHorizontal: 10,
     // alignItems: "center",
     // justifyContent: "center",
   },
@@ -92,11 +114,12 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   button: {
-    margin: 30,
+    // margin: 10,
     flex: 1,
   },
   buttonWrapper: {
     flexDirection: "row",
     justifyContent: "space-around",
+    gap: 10,
   },
 });

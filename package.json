@@ -16,7 +16,8 @@
     "expo-updates": "~0.16.4",
     "react": "18.2.0",
     "react-native": "0.71.7",
-    "react-native-android-notification-listener": "^5.0.1"
+    "react-native-android-notification-listener": "^5.0.1",
+    "ynab": "^1.49.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

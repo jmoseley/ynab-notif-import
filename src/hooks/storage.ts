@@ -54,9 +54,16 @@ export const useAsyncStorageChange = <T>(key: string) => {
     setData(null);
   }, [setData, key]);
 
+  const storeValue = useCallback(
+    async (value: T) => {
+      await storeData(key, value);
+    },
+    [key]
+  );
+
   useEffect(() => {
     refetch();
   }, [refetch]);
 
-  return { refetch, clear, data };
+  return { refetch, clear, data, storeValue };
 };
