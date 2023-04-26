@@ -1,15 +1,14 @@
+import "react-native-url-polyfill/auto";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
   AppRegistry,
   Button,
   Image,
-  Modal,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import RNAndroidNotificationListener, {
@@ -21,8 +20,7 @@ import {
   NotificationPayload,
 } from "./src/hooks/notificationHandler";
 import { useAsyncStorageChange } from "./src/hooks/storage";
-import { useYnab } from "./src/hooks/ynab";
-import YnabAccessTokenModal from "./src/components/ynabAccessTokenModal";
+import YnabConfigurationModal from "./src/components/ynabConfigurationModal";
 
 export default function App() {
   useEffect(() => {
@@ -40,16 +38,17 @@ export default function App() {
   const { refetch, clear, data } =
     useAsyncStorageChange<NotificationPayload[]>("@notifications");
 
-  const { client, setAccessToken } = useYnab();
-  const [accessTokenModalVisible, setAccessTokenModalVisible] = useState(false);
+  const [configurationModalVisible, setConfigurationModalVisible] =
+    useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
-      <YnabAccessTokenModal
-        accessTokenModalVisible={accessTokenModalVisible}
-        setAccessTokenModalVisible={setAccessTokenModalVisible}
-        setAccessToken={setAccessToken}
-      />
+      {configurationModalVisible && (
+        <YnabConfigurationModal
+          isVisible={configurationModalVisible}
+          setIsVisible={setConfigurationModalVisible}
+        />
+      )}
       <View style={styles.buttonWrapper}>
         <View style={styles.button}>
           <Button title="Reload Notifications" onPress={refetch} />
@@ -59,14 +58,14 @@ export default function App() {
         </View>
         <View style={styles.button}>
           <Button
-            title="Set YNAB Access Token"
-            onPress={() => setAccessTokenModalVisible(true)}
+            title="Configure YNAB"
+            onPress={() => setConfigurationModalVisible(true)}
           />
         </View>
       </View>
-      <View style={{ marginVertical: 10 }}>
+      {/* <View style={{ marginVertical: 10 }}>
         {client && <Text>{`YNAB is configured`}</Text>}
-      </View>
+      </View> */}
       <ScrollView>
         {data?.map((notification) => (
           <View key={notification.time} style={styles.row}>

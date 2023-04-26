@@ -8,9 +8,10 @@ export type Currency = (typeof Currencies)[number];
 
 export const useYnab = () => {
   const { data: ynabAccessToken, storeValue: setAccessToken } =
-    useAsyncStorageChange<string>("@ynabAccessToken");
-  const { data: budgetId, storeValue: storeBudgetId } =
-    useAsyncStorageChange<string>("@ynabBudgetId");
+    useAsyncStorageChange<string | null>("@ynabAccessToken");
+  const { data: budgetId, storeValue: storeBudgetId } = useAsyncStorageChange<
+    string | null
+  >("@ynabBudgetId");
   const { data: configuredAccounts, storeValue: storeConfiguredAccounts } =
     useAsyncStorageChange<{ [key in Currency]?: string } | null>(
       "@ynabConfiguredAccounts"
@@ -18,6 +19,7 @@ export const useYnab = () => {
 
   const client = useMemo(() => {
     if (ynabAccessToken) {
+      console.log("creating ynab client", ynabAccessToken);
       return new ynab.API(ynabAccessToken);
     } else {
       return null;
@@ -28,6 +30,7 @@ export const useYnab = () => {
     client,
     setAccessToken,
     setBudgetId: storeBudgetId,
+    budgetId,
     configuredAccounts: configuredAccounts ?? {},
     setConfiguredAccounts: storeConfiguredAccounts,
   };

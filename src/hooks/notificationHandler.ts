@@ -29,7 +29,6 @@ export interface NotificationPayload {
 export const notificationHandler = async (params: {
   notification?: string | null;
 }) => {
-  console.log("params", Object.keys(params));
   const { notification: notificationStr } = params;
   /**
    * This notification is a JSON string in the follow format:
@@ -65,7 +64,6 @@ export const notificationHandler = async (params: {
     } catch (e) {
       console.error("Error parsing notification", e);
     }
-    console.info("notification", notification);
 
     if (filterNotification(notification)) {
       console.info("Notification filtered");
