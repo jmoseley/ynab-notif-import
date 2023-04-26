@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   AppRegistry,
   Button,
+  Image,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -69,13 +70,31 @@ export default function App() {
       <ScrollView>
         {data?.map((notification) => (
           <View key={notification.time} style={styles.row}>
-            {notification.app && <Text>{notification.app}</Text>}
-            {notification.title && (
-              <Text>{`Title: ${notification.title}`}</Text>
-            )}
-            {notification.text && <Text>{`Text: ${notification.text}`}</Text>}
-            {notification.subText && (
-              <Text>{`SubText: ${notification.subText}`}</Text>
+            {(Object.keys(notification) as (keyof NotificationPayload)[]).map(
+              (key) => {
+                if (key === "groupedMessages") return null;
+                if (!notification[key]) return null;
+
+                if (notification[key].startsWith("data:")) {
+                  return (
+                    <View key={key}>
+                      <Text>{`${key}:`}</Text>
+                      <Image
+                        source={{ uri: notification[key] }}
+                        alt={key}
+                        style={{
+                          width: 100,
+                          height: 100,
+                          borderColor: "black",
+                          borderWidth: 1,
+                        }}
+                      />
+                    </View>
+                  );
+                }
+
+                return <Text key={key}>{`${key}: ${notification[key]}`}</Text>;
+              }
             )}
             {notification.groupedMessages.length > 0 &&
               notification.groupedMessages.map((message, idx) => (
