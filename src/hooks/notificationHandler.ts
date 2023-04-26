@@ -1,5 +1,6 @@
-import { filterNotification } from "./filters";
+import { filterNotification, parseNotification } from "./filters";
 import { getData, storeData } from "./storage";
+import { createTransaction } from "./ynab";
 
 export interface NotificationPayload {
   time: string;
@@ -81,5 +82,13 @@ export const notificationHandler = async (params: {
     existingNotifications.push(notification);
 
     await storeData("@notifications", existingNotifications);
+
+    const transaction = parseNotification(notification);
+    console.info("transaction", transaction);
+    if (!transaction) {
+      console.info("Transaction not parsed");
+      return;
+    }
+    await createTransaction(transaction);
   }
 };
