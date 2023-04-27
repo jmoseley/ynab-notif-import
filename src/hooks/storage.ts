@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
-// import { ConfiguredAccounts, Transaction } from "./ynab";
+import { Transaction } from "./ynab";
 import { NotificationPayload } from "./notificationHandler";
 
 const listeners: { key: string; listener: (value: any) => void }[] = [];
