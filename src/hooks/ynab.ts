@@ -17,8 +17,10 @@ export const useYnab = () => {
     useAsyncStorage("@ynabAccessToken");
   const { data: budgetId, storeValue: storeBudgetId } =
     useAsyncStorage("@ynabBudgetId");
-  const { data: configuredAccounts, storeValue: storeConfiguredAccounts } =
-    useAsyncStorage("@ynabConfiguredAccounts");
+  // const { data: configuredAccounts, storeValue: storeConfiguredAccounts } =
+  //   useAsyncStorage("@ynabConfiguredAccounts");
+  const { data: defaultAccount, storeValue: storeDefaultAccount } =
+    useAsyncStorage("@default-account");
 
   const client = useMemo(() => {
     if (ynabAccessToken) {
@@ -34,8 +36,10 @@ export const useYnab = () => {
     setAccessToken,
     setBudgetId: storeBudgetId,
     budgetId,
-    configuredAccounts: configuredAccounts ?? {},
-    setConfiguredAccounts: storeConfiguredAccounts,
+    // configuredAccounts: configuredAccounts ?? {},
+    defaultAccount,
+    storeDefaultAccount,
+    // setConfiguredAccounts: storeConfiguredAccounts,
   };
 };
 
@@ -119,17 +123,9 @@ const createTransaction = async (transaction: Transaction) => {
     console.error("No YNAB budget ID found");
     return;
   }
-  const configuredAccounts = await getData("@ynabConfiguredAccounts");
-  if (!configuredAccounts) {
-    console.error("No YNAB configured accounts found");
-    return;
-  }
-  const accountId = configuredAccounts?.[transaction.currency];
+  const accountId = await getData("@default-account");
   if (!accountId) {
-    console.error(
-      "No YNAB account ID found for currency",
-      transaction.currency
-    );
+    console.error("No YNAB account ID found");
     return;
   }
 

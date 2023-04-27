@@ -16,9 +16,11 @@ const YnabConfigurationModal = ({
   const {
     setAccessToken,
     setBudgetId,
-    setConfiguredAccounts,
-    configuredAccounts,
+    // setConfiguredAccounts,
+    // configuredAccounts,
     client,
+    storeDefaultAccount,
+    defaultAccount,
     budgetId,
   } = useYnab();
 
@@ -152,30 +154,46 @@ const YnabConfigurationModal = ({
         )}
         {accounts && (
           <View>
-            {Currencies.map((currency) => (
-              <View key={currency}>
-                <Text>{`Choose account for ${currency}`}</Text>
-                <Picker
-                  selectedValue={configuredAccounts[currency]}
-                  onValueChange={(itemValue) =>
-                    setConfiguredAccounts({
-                      ...configuredAccounts,
-                      [currency]: itemValue,
-                    })
-                  }
-                >
-                  <Picker.Item label="None" value={null} />
-                  {accounts.map((account) => (
-                    <Picker.Item
-                      key={account.id}
-                      label={account.name}
-                      value={account.id}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            ))}
+            <Text>Choose Account</Text>
+            <Picker
+              selectedValue={defaultAccount}
+              onValueChange={(itemValue) => storeDefaultAccount(itemValue)}
+            >
+              <Picker.Item label="None" value={null} />
+              {accounts.map((account) => (
+                <Picker.Item
+                  key={account.id}
+                  label={account.name}
+                  value={account.id}
+                />
+              ))}
+            </Picker>
           </View>
+          // <View>
+          //   {Currencies.map((currency) => (
+          //     <View key={currency}>
+          //       <Text>{`Choose account for ${currency}`}</Text>
+          //       <Picker
+          //         selectedValue={configuredAccounts[currency]}
+          //         onValueChange={(itemValue) =>
+          //           setConfiguredAccounts({
+          //             ...configuredAccounts,
+          //             [currency]: itemValue,
+          //           })
+          //         }
+          //       >
+          //         <Picker.Item label="None" value={null} />
+          //         {accounts.map((account) => (
+          //           <Picker.Item
+          //             key={account.id}
+          //             label={account.name}
+          //             value={account.id}
+          //           />
+          //         ))}
+          //       </Picker>
+          //     </View>
+          //   ))}
+          // </View>
         )}
       </View>
     </Modal>

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
-import { ConfiguredAccounts, Transaction } from "./ynab";
+// import { ConfiguredAccounts, Transaction } from "./ynab";
 import { NotificationPayload } from "./notificationHandler";
 
 const listeners: { key: string; listener: (value: any) => void }[] = [];
@@ -8,19 +8,21 @@ const listeners: { key: string; listener: (value: any) => void }[] = [];
 const STORAGE_KEYS = [
   "@ynabAccessToken",
   "@ynabBudgetId",
-  "@ynabConfiguredAccounts",
+  // "@ynabConfiguredAccounts",
   "@notifications-handled",
   "@notifications-ignored",
   "@created-transactions",
+  "@default-account",
 ] as const;
 type StorageKey = (typeof STORAGE_KEYS)[number];
 type StorageValueMap = {
   "@ynabAccessToken": string | null;
   "@ynabBudgetId": string | null;
-  "@ynabConfiguredAccounts": ConfiguredAccounts | null;
+  // "@ynabConfiguredAccounts": ConfiguredAccounts | null;
   "@notifications-handled": NotificationPayload[] | null;
   "@notifications-ignored": NotificationPayload[] | null;
   "@created-transactions": Transaction[] | null;
+  "@default-account": string | null;
 };
 
 export const storeData = async <K extends StorageKey>(
