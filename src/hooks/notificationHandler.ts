@@ -71,8 +71,8 @@ export const notificationHandler = async (params: {
     }
 
     const handled = await handleNotification(notification);
-    const notificationListKey = `@notifications-${
-      handled ? "handled" : "ignored"
+    const notificationListKey = `@notifications${
+      handled ? "" : "-ignored"
     }` as const;
 
     const existingNotifications: NotificationPayload[] =

@@ -41,7 +41,7 @@ export default function App() {
     clear,
     data: notifications,
     storeValue: storeNotifications,
-  } = useAsyncStorageChange("@notifications-handled");
+  } = useAsyncStorageChange("@notifications");
 
   const [configurationModalVisible, setConfigurationModalVisible] =
     useState(false);

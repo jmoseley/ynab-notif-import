@@ -109,7 +109,7 @@ const createTransaction = async (transaction: Transaction) => {
   console.info("creating transaction", transaction, accountId);
 
   // YNAB uses milliunits, so multiply by 1000: https://api.ynab.com/#formats
-  const amount = Math.floor(transaction.amount * 1000);
+  const amount = -Math.floor(transaction.amount * 1000);
 
   const client = new ynab.API(accessToken);
   await client.transactions.createTransaction(budgetId, {
@@ -117,6 +117,7 @@ const createTransaction = async (transaction: Transaction) => {
       account_id: accountId,
       date: transaction.date,
       amount,
+      payee_name: transaction.payee,
     },
   });
 };

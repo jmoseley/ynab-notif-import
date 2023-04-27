@@ -9,7 +9,7 @@ const STORAGE_KEYS = [
   "@ynabAccessToken",
   "@ynabBudgetId",
   "@ynabConfiguredAccounts",
-  "@notifications-handled",
+  "@notifications",
   "@notifications-ignored",
 ] as const;
 type StorageKey = (typeof STORAGE_KEYS)[number];
@@ -17,7 +17,7 @@ type StorageValueMap = {
   "@ynabAccessToken": string | null;
   "@ynabBudgetId": string | null;
   "@ynabConfiguredAccounts": ConfiguredAccounts | null;
-  "@notifications-handled": NotificationPayload[] | null;
+  "@notifications": NotificationPayload[] | null;
   "@notifications-ignored": NotificationPayload[] | null;
 };
 
