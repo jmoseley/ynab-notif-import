@@ -1,5 +1,4 @@
 import { NotificationPayload } from "./notificationHandler";
-import { Currencies, Currency, Transaction } from "./ynab";
 
 interface Filter {
   app: string | RegExp;

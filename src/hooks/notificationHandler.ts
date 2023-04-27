@@ -71,20 +71,15 @@ export const notificationHandler = async (params: {
     }
 
     const handled = await handleNotification(notification);
-    // if (handled) {
-    //   console.info("Notification handled");
-    //   return;
-    // }
+    const notificationListKey = `@notifications-${
+      handled ? "handled" : "ignored"
+    }` as const;
 
-    /**
-     * You could store the notifications in an external API.
-     * I'm using AsyncStorage in the example project.
-     */
-    const existingNotifications = ((await getData("@notifications")) ||
-      []) as NotificationPayload[];
+    const existingNotifications: NotificationPayload[] =
+      (await getData(notificationListKey)) || [];
 
     existingNotifications.push(notification);
 
-    await storeData("@notifications", existingNotifications);
+    await storeData(notificationListKey, existingNotifications);
   }
 };

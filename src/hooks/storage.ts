@@ -1,9 +1,30 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
+import { ConfiguredAccounts } from "./ynab";
+import { NotificationPayload } from "./notificationHandler";
 
 const listeners: { key: string; listener: (value: any) => void }[] = [];
 
-export const storeData = async <T>(key: string, object: T) => {
+const STORAGE_KEYS = [
+  "@ynabAccessToken",
+  "@ynabBudgetId",
+  "@ynabConfiguredAccounts",
+  "@notifications-handled",
+  "@notifications-ignored",
+] as const;
+type StorageKey = (typeof STORAGE_KEYS)[number];
+type StorageValueMap = {
+  "@ynabAccessToken": string | null;
+  "@ynabBudgetId": string | null;
+  "@ynabConfiguredAccounts": ConfiguredAccounts | null;
+  "@notifications-handled": NotificationPayload[] | null;
+  "@notifications-ignored": NotificationPayload[] | null;
+};
+
+export const storeData = async <K extends StorageKey>(
+  key: K,
+  object: StorageValueMap[K]
+) => {
   try {
     const value = JSON.stringify(object);
     await AsyncStorage.setItem(key, value);
@@ -17,11 +38,11 @@ export const storeData = async <T>(key: string, object: T) => {
   }
 };
 
-export const getData = async <T>(key: string) => {
+export const getData = async <K extends StorageKey>(key: K) => {
   try {
     const value = await AsyncStorage.getItem(key);
     if (value !== null) {
-      return JSON.parse(value) as T;
+      return JSON.parse(value) as StorageValueMap[K];
     } else {
       return null;
     }
@@ -39,14 +60,13 @@ export const removeData = async (key: string) => {
   }
 };
 
-export const useAsyncStorageChange = <T>(key: string) => {
-  const [data, setData] = useState<T | null>(null);
+export const useAsyncStorageChange = <K extends StorageKey>(key: K) => {
+  const [data, setData] = useState<StorageValueMap[K] | null>(null);
 
   listeners.push({ key, listener: setData });
 
   const refetch = useCallback(async () => {
-    console.log("refetching", key);
-    const value = await getData<T>(key);
+    const value = await getData(key);
     setData(value || null);
   }, [key, setData]);
 
@@ -56,7 +76,7 @@ export const useAsyncStorageChange = <T>(key: string) => {
   }, [setData, key]);
 
   const storeValue = useCallback(
-    async (value: T) => {
+    async (value: StorageValueMap[K]) => {
       await storeData(key, value);
     },
     [key]

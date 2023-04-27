@@ -6,18 +6,17 @@ import { NotificationPayload } from "./notificationHandler";
 
 export const Currencies = ["$", "€", "£"] as const;
 export type Currency = (typeof Currencies)[number];
-type ConfiguredAccounts = {
+export type ConfiguredAccounts = {
   [key in Currency]?: string;
 };
 
 export const useYnab = () => {
   const { data: ynabAccessToken, storeValue: setAccessToken } =
-    useAsyncStorageChange<string | null>("@ynabAccessToken");
-  const { data: budgetId, storeValue: storeBudgetId } = useAsyncStorageChange<
-    string | null
-  >("@ynabBudgetId");
+    useAsyncStorageChange("@ynabAccessToken");
+  const { data: budgetId, storeValue: storeBudgetId } =
+    useAsyncStorageChange("@ynabBudgetId");
   const { data: configuredAccounts, storeValue: storeConfiguredAccounts } =
-    useAsyncStorageChange<ConfiguredAccounts | null>("@ynabConfiguredAccounts");
+    useAsyncStorageChange("@ynabConfiguredAccounts");
 
   const client = useMemo(() => {
     if (ynabAccessToken) {
@@ -42,10 +41,11 @@ export interface Transaction {
   date: string;
   currency: Currency;
   amount: number;
+  payee: string;
 }
 
 export const handleNotification = async (notification: NotificationPayload) => {
-  const transaction = parseNotification(notification);
+  const transaction = parseRevolut(notification);
   console.info("transaction", transaction);
   if (!transaction) {
     console.info("Transaction not parsed");
@@ -55,13 +55,10 @@ export const handleNotification = async (notification: NotificationPayload) => {
   return true;
 };
 
-const parseNotification = (
+const parseRevolut = (
   notification: NotificationPayload
 ): Transaction | null => {
-  if (
-    notification.app !== "com.revolut.revolut" &&
-    notification.app !== "com.test.test"
-  ) {
+  if (notification.app !== "com.revolut.revolut") {
     return null;
   }
 
@@ -78,25 +75,24 @@ const parseNotification = (
     date: new Date(parseInt(notification.time)).toISOString(),
     currency: currency as Currency,
     amount,
+    payee: notification.title,
   };
 };
 
 const createTransaction = async (transaction: Transaction) => {
-  const accessToken = await getData<string>("@ynabAccessToken");
+  const accessToken = await getData("@ynabAccessToken");
 
   if (!accessToken) {
     console.error("No YNAB access token found");
     return;
   }
 
-  const budgetId = await getData<string>("@ynabBudgetId");
+  const budgetId = await getData("@ynabBudgetId");
   if (!budgetId) {
     console.error("No YNAB budget ID found");
     return;
   }
-  const configuredAccounts = await getData<ConfiguredAccounts>(
-    "@ynabConfiguredAccounts"
-  );
+  const configuredAccounts = await getData("@ynabConfiguredAccounts");
   if (!configuredAccounts) {
     console.error("No YNAB configured accounts found");
     return;
