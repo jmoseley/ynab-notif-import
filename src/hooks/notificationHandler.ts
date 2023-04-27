@@ -71,10 +71,10 @@ export const notificationHandler = async (params: {
     }
 
     const handled = await handleNotification(notification);
-    if (handled) {
-      console.info("Notification handled");
-      return;
-    }
+    // if (handled) {
+    //   console.info("Notification handled");
+    //   return;
+    // }
 
     /**
      * You could store the notifications in an external API.

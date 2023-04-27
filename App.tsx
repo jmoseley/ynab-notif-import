@@ -84,7 +84,7 @@ export default function App() {
                   }
                 }) || []
               );
-              await storeNotifications(unhandledNotifications);
+              // await storeNotifications(unhandledNotifications);
             }}
           />
         </View>
