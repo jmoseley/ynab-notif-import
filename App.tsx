@@ -14,14 +14,17 @@ import {
 import RNAndroidNotificationListener, {
   RNAndroidNotificationListenerHeadlessJsName,
 } from "react-native-android-notification-listener";
+import * as Updates from "expo-updates";
 
 import {
   notificationHandler,
   NotificationPayload,
 } from "./src/hooks/notificationHandler";
-import { useAsyncStorageChange } from "./src/hooks/storage";
+import { useAsyncStorage } from "./src/hooks/storage";
 import YnabConfigurationModal from "./src/components/ynabConfigurationModal";
-import { handleNotification } from "./src/hooks/ynab";
+import DebugModal from "./src/components/debugModal";
+
+// const IS_PROD = Updates.manifest?.extra !== undefined;
 
 export default function App() {
   useEffect(() => {
@@ -36,15 +39,13 @@ export default function App() {
     })();
   }, []);
 
-  const {
-    refetch,
-    clear,
-    data: notifications,
-    storeValue: storeNotifications,
-  } = useAsyncStorageChange("@notifications");
+  const { data: transactionsCreated } = useAsyncStorage(
+    "@created-transactions"
+  );
 
   const [configurationModalVisible, setConfigurationModalVisible] =
     useState(false);
+  const [debugModalVisible, setDebugModalVisible] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -54,13 +55,13 @@ export default function App() {
           setIsVisible={setConfigurationModalVisible}
         />
       )}
+      {debugModalVisible && (
+        <DebugModal
+          isVisible={debugModalVisible}
+          setIsVisible={setDebugModalVisible}
+        />
+      )}
       <View style={styles.buttonWrapper}>
-        <View style={styles.button}>
-          <Button title="Reload" onPress={refetch} />
-        </View>
-        <View style={styles.button}>
-          <Button title="Clear All" onPress={clear} />
-        </View>
         <View style={styles.button}>
           <Button
             title="Configure YNAB"
@@ -69,124 +70,13 @@ export default function App() {
         </View>
         <View style={styles.button}>
           <Button
-            title="Reprocess Notifications"
+            title="Debug"
             onPress={async () => {
-              const unhandledNotifications: NotificationPayload[] = [];
-              await Promise.all(
-                notifications?.map(async (notification) => {
-                  const result = await handleNotification(notification);
-                  if (result) {
-                    console.log("notification handled");
-                  } else {
-                    unhandledNotifications.push(notification);
-                  }
-                }) || []
-              );
-              // await storeNotifications(unhandledNotifications);
-            }}
-          />
-        </View>
-        <View style={styles.button}>
-          <Button
-            title="Create Test Notification"
-            onPress={async () => {
-              const notification: NotificationPayload = {
-                time: new Date().getTime().toString(),
-                app: "com.test.test",
-                titleBig: "Test Notification",
-                title: "Test Notification",
-                text: "Paid $1.00 for a test notification",
-                subText: "",
-                bigText: "",
-                summaryText: "",
-                groupedMessages: [],
-                icon: "",
-                imageBackgroundURI: "",
-                audioContentsURI: "",
-                extraInfoText: "",
-                image: "",
-              };
-              await storeNotifications([
-                ...(notifications || []),
-                notification,
-              ]);
+              setDebugModalVisible(true);
             }}
           />
         </View>
       </View>
-      <ScrollView>
-        {notifications?.map((notification) => (
-          <View
-            key={notification.time}
-            style={{ ...styles.row, ...styles.notificationWrapper }}
-          >
-            <View>
-              {(Object.keys(notification) as (keyof NotificationPayload)[]).map(
-                (key) => {
-                  if (key === "groupedMessages") return null;
-                  if (!notification[key]) return null;
-
-                  if (notification[key].startsWith("data:")) {
-                    return (
-                      <View key={key}>
-                        <Text>{`${key}:`}</Text>
-                        <Image
-                          source={{ uri: notification[key] }}
-                          alt={key}
-                          style={{
-                            width: 100,
-                            height: 100,
-                            borderColor: "black",
-                            borderWidth: 1,
-                          }}
-                        />
-                      </View>
-                    );
-                  }
-
-                  return (
-                    <Text key={key}>{`${key}: ${notification[key]}`}</Text>
-                  );
-                }
-              )}
-              {notification.groupedMessages.length > 0 &&
-                notification.groupedMessages.map((message, idx) => (
-                  <View style={styles.row} key={idx}>
-                    <Text>{idx}</Text>
-                    {message.title && <Text>{message.title}</Text>}
-                    {message.text && <Text>{message.text}</Text>}
-                  </View>
-                ))}
-            </View>
-            <View style={styles.buttonWrapper}>
-              <View style={styles.button}>
-                <Button
-                  title="Clear"
-                  onPress={async () => {
-                    const newNotifications = notifications.filter(
-                      (n) => n.time !== notification.time
-                    );
-                    await storeNotifications(newNotifications);
-                  }}
-                />
-              </View>
-              <View style={styles.button}>
-                <Button
-                  title="Reprocess"
-                  onPress={async () => {
-                    const result = await handleNotification(notification);
-                    if (result) {
-                      console.log("notification handled");
-                    } else {
-                      console.log("notification not handled");
-                    }
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
       <StatusBar style="auto" />
     </SafeAreaView>
   );

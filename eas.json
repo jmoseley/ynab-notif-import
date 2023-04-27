@@ -15,7 +15,10 @@
       "ios": {
         "resourceClass": "m1-medium"
       },
-      "channel": "main"
+      "channel": "main",
+      "env": {
+        "ENV": "production"
+      }
     }
   },
   "submit": {

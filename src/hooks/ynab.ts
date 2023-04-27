@@ -1,6 +1,6 @@
 import * as ynab from "ynab";
 
-import { getData, useAsyncStorageChange } from "./storage";
+import { getData, useAsyncStorage } from "./storage";
 import { useMemo } from "react";
 import { NotificationPayload } from "./notificationHandler";
 
@@ -10,13 +10,15 @@ export type ConfiguredAccounts = {
   [key in Currency]?: string;
 };
 
+const CURRENCY_REGEX = /(-)?(£|€|\$)(\d+(\.\d+)?)/;
+
 export const useYnab = () => {
   const { data: ynabAccessToken, storeValue: setAccessToken } =
-    useAsyncStorageChange("@ynabAccessToken");
+    useAsyncStorage("@ynabAccessToken");
   const { data: budgetId, storeValue: storeBudgetId } =
-    useAsyncStorageChange("@ynabBudgetId");
+    useAsyncStorage("@ynabBudgetId");
   const { data: configuredAccounts, storeValue: storeConfiguredAccounts } =
-    useAsyncStorageChange("@ynabConfiguredAccounts");
+    useAsyncStorage("@ynabConfiguredAccounts");
 
   const client = useMemo(() => {
     if (ynabAccessToken) {
@@ -45,7 +47,7 @@ export interface Transaction {
 }
 
 export const handleNotification = async (notification: NotificationPayload) => {
-  const transaction = parseRevolut(notification);
+  const transaction = parseRevolut(notification) || parseTest(notification);
   console.info("transaction", transaction);
   if (!transaction) {
     console.info("Transaction not parsed");
@@ -62,14 +64,39 @@ const parseRevolut = (
     return null;
   }
 
-  const amountPaid = notification.text.match(/(£|€|\$)(\d+(\.\d+)?)/);
+  const amountPaid = notification.text.match(CURRENCY_REGEX);
 
-  const currency = amountPaid?.[1] || null;
-  const amountStr = amountPaid?.[2] || null;
+  const isNegative = amountPaid?.[1] === "-";
+  const currency = amountPaid?.[2] || null;
+  const amountStr = amountPaid?.[3] || null;
   if (!currency || !amountStr || !Currencies.some((c) => c === currency)) {
     return null;
   }
-  const amount = parseFloat(amountStr);
+  const amount = parseFloat(amountStr) * (isNegative ? -1 : 1);
+
+  return {
+    date: new Date(parseInt(notification.time)).toISOString(),
+    currency: currency as Currency,
+    amount,
+    payee: notification.title,
+  };
+};
+
+const parseTest = (notification: NotificationPayload): Transaction | null => {
+  if (notification.app !== "com.test.test") {
+    return null;
+  }
+
+  const amountPaid = notification.text.match(CURRENCY_REGEX);
+  console.log("amountPaid", amountPaid);
+
+  const isNegative = amountPaid?.[1] === "-";
+  const currency = amountPaid?.[2] || null;
+  const amountStr = amountPaid?.[3] || null;
+  if (!currency || !amountStr || !Currencies.some((c) => c === currency)) {
+    return null;
+  }
+  const amount = parseFloat(amountStr) * (isNegative ? -1 : 1);
 
   return {
     date: new Date(parseInt(notification.time)).toISOString(),
