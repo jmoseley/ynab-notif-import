@@ -56,10 +56,10 @@ export default function App() {
       )}
       <View style={styles.buttonWrapper}>
         <View style={styles.button}>
-          <Button title="Reload Notifications" onPress={refetch} />
+          <Button title="Reload" onPress={refetch} />
         </View>
         <View style={styles.button}>
-          <Button title="Clear Notifications" onPress={clear} />
+          <Button title="Clear All" onPress={clear} />
         </View>
         <View style={styles.button}>
           <Button
@@ -67,8 +67,6 @@ export default function App() {
             onPress={() => setConfigurationModalVisible(true)}
           />
         </View>
-      </View>
-      <View style={{ ...styles.buttonWrapper, marginVertical: 5 }}>
         <View style={styles.button}>
           <Button
             title="Reprocess Notifications"
@@ -85,6 +83,33 @@ export default function App() {
                 }) || []
               );
               // await storeNotifications(unhandledNotifications);
+            }}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Create Test Notification"
+            onPress={async () => {
+              const notification: NotificationPayload = {
+                time: new Date().getTime().toString(),
+                app: "com.test.test",
+                titleBig: "Test Notification",
+                title: "Test Notification",
+                text: "Paid $1.00 for a test notification",
+                subText: "",
+                bigText: "",
+                summaryText: "",
+                groupedMessages: [],
+                icon: "",
+                imageBackgroundURI: "",
+                audioContentsURI: "",
+                extraInfoText: "",
+                image: "",
+              };
+              await storeNotifications([
+                ...(notifications || []),
+                notification,
+              ]);
             }}
           />
         </View>
@@ -133,16 +158,31 @@ export default function App() {
                   </View>
                 ))}
             </View>
-            <View style={styles.button}>
-              <Button
-                title="Clear"
-                onPress={async () => {
-                  const newNotifications = notifications.filter(
-                    (n) => n.time !== notification.time
-                  );
-                  await storeNotifications(newNotifications);
-                }}
-              />
+            <View style={styles.buttonWrapper}>
+              <View style={styles.button}>
+                <Button
+                  title="Clear"
+                  onPress={async () => {
+                    const newNotifications = notifications.filter(
+                      (n) => n.time !== notification.time
+                    );
+                    await storeNotifications(newNotifications);
+                  }}
+                />
+              </View>
+              <View style={styles.button}>
+                <Button
+                  title="Reprocess"
+                  onPress={async () => {
+                    const result = await handleNotification(notification);
+                    if (result) {
+                      console.log("notification handled");
+                    } else {
+                      console.log("notification not handled");
+                    }
+                  }}
+                />
+              </View>
             </View>
           </View>
         ))}
@@ -180,10 +220,12 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
+    minWidth: 100,
   },
   buttonWrapper: {
     flexDirection: "row",
     justifyContent: "space-around",
+    flexWrap: "wrap",
     gap: 10,
   },
 });

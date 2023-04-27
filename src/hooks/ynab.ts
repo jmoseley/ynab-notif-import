@@ -58,7 +58,10 @@ export const handleNotification = async (notification: NotificationPayload) => {
 const parseNotification = (
   notification: NotificationPayload
 ): Transaction | null => {
-  if (notification.app !== "com.revolut.revolut") {
+  if (
+    notification.app !== "com.revolut.revolut" &&
+    notification.app !== "com.test.test"
+  ) {
     return null;
   }
 
@@ -98,7 +101,7 @@ const createTransaction = async (transaction: Transaction) => {
     console.error("No YNAB configured accounts found");
     return;
   }
-  const accountId = configuredAccounts[transaction.currency];
+  const accountId = configuredAccounts?.[transaction.currency];
   if (!accountId) {
     console.error(
       "No YNAB account ID found for currency",
