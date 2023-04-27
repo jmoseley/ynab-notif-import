@@ -91,41 +91,59 @@ export default function App() {
       </View>
       <ScrollView>
         {notifications?.map((notification) => (
-          <View key={notification.time} style={styles.row}>
-            {(Object.keys(notification) as (keyof NotificationPayload)[]).map(
-              (key) => {
-                if (key === "groupedMessages") return null;
-                if (!notification[key]) return null;
+          <View
+            key={notification.time}
+            style={{ ...styles.row, ...styles.notificationWrapper }}
+          >
+            <View>
+              {(Object.keys(notification) as (keyof NotificationPayload)[]).map(
+                (key) => {
+                  if (key === "groupedMessages") return null;
+                  if (!notification[key]) return null;
 
-                if (notification[key].startsWith("data:")) {
+                  if (notification[key].startsWith("data:")) {
+                    return (
+                      <View key={key}>
+                        <Text>{`${key}:`}</Text>
+                        <Image
+                          source={{ uri: notification[key] }}
+                          alt={key}
+                          style={{
+                            width: 100,
+                            height: 100,
+                            borderColor: "black",
+                            borderWidth: 1,
+                          }}
+                        />
+                      </View>
+                    );
+                  }
+
                   return (
-                    <View key={key}>
-                      <Text>{`${key}:`}</Text>
-                      <Image
-                        source={{ uri: notification[key] }}
-                        alt={key}
-                        style={{
-                          width: 100,
-                          height: 100,
-                          borderColor: "black",
-                          borderWidth: 1,
-                        }}
-                      />
-                    </View>
+                    <Text key={key}>{`${key}: ${notification[key]}`}</Text>
                   );
                 }
-
-                return <Text key={key}>{`${key}: ${notification[key]}`}</Text>;
-              }
-            )}
-            {notification.groupedMessages.length > 0 &&
-              notification.groupedMessages.map((message, idx) => (
-                <View style={styles.row} key={idx}>
-                  <Text>{idx}</Text>
-                  {message.title && <Text>{message.title}</Text>}
-                  {message.text && <Text>{message.text}</Text>}
-                </View>
-              ))}
+              )}
+              {notification.groupedMessages.length > 0 &&
+                notification.groupedMessages.map((message, idx) => (
+                  <View style={styles.row} key={idx}>
+                    <Text>{idx}</Text>
+                    {message.title && <Text>{message.title}</Text>}
+                    {message.text && <Text>{message.text}</Text>}
+                  </View>
+                ))}
+            </View>
+            <View style={styles.button}>
+              <Button
+                title="Clear"
+                onPress={async () => {
+                  const newNotifications = notifications.filter(
+                    (n) => n.time !== notification.time
+                  );
+                  await storeNotifications(newNotifications);
+                }}
+              />
+            </View>
           </View>
         ))}
       </ScrollView>
@@ -148,14 +166,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     marginHorizontal: 10,
-    // alignItems: "center",
-    // justifyContent: "center",
   },
   row: {
-    paddingBottom: 10,
+    marginBottom: 10,
+  },
+  notificationWrapper: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    gap: 15,
+    borderColor: "grey",
+    borderWidth: 1,
+    padding: 10,
   },
   button: {
-    // margin: 10,
     flex: 1,
   },
   buttonWrapper: {
