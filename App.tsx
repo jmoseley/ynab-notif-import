@@ -77,6 +77,18 @@ export default function App() {
           />
         </View>
       </View>
+      <ScrollView>
+        {transactionsCreated?.map((transaction) => (
+          <View key={transaction.date} style={styles.row}>
+            <View style={styles.notificationWrapper}>
+              <Text>Transaction</Text>
+              <Text>{transaction.payee}</Text>
+              <Text>{transaction.amount}</Text>
+              <Text>{transaction.date}</Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
       <StatusBar style="auto" />
     </SafeAreaView>
   );

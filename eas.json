@@ -12,14 +12,11 @@
       "channel": "main"
     },
     "production": {
-      "distribution": "internal",
       "ios": {
         "resourceClass": "m1-medium"
       },
       "channel": "main",
-      "env": {
-        "ENV": "production"
-      }
+      "distribution": "internal"
     }
   },
   "submit": {

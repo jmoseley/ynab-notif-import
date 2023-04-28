@@ -1,6 +1,6 @@
 import * as ynab from "ynab";
 
-import { getData, useAsyncStorage } from "./storage";
+import { getData, storeData, useAsyncStorage } from "./storage";
 import { useMemo } from "react";
 import { NotificationPayload } from "./notificationHandler";
 
@@ -131,6 +131,10 @@ const createTransaction = async (transaction: Transaction) => {
   }
 
   console.info("creating transaction", transaction, accountId);
+
+  const existingTransactions = (await getData("@created-transactions")) || [];
+  existingTransactions.push(transaction);
+  await storeData("@created-transactions", existingTransactions);
 
   // YNAB uses milliunits, so multiply by 1000: https://api.ynab.com/#formats
   const amount = -Math.floor(transaction.amount * 1000);
