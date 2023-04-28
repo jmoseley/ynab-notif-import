@@ -20,7 +20,7 @@ import {
   notificationHandler,
   NotificationPayload,
 } from "./src/hooks/notificationHandler";
-import { useAsyncStorage } from "./src/hooks/storage";
+import { storeData, useAsyncStorage } from "./src/hooks/storage";
 import YnabConfigurationModal from "./src/components/ynabConfigurationModal";
 import DebugModal from "./src/components/debugModal";
 
@@ -39,9 +39,8 @@ export default function App() {
     })();
   }, []);
 
-  const { data: transactionsCreated } = useAsyncStorage(
-    "@created-transactions"
-  );
+  const { data: transactionsCreated, storeValue: storeTransactions } =
+    useAsyncStorage("@created-transactions");
 
   const [configurationModalVisible, setConfigurationModalVisible] =
     useState(false);
@@ -73,6 +72,14 @@ export default function App() {
             title="Debug"
             onPress={async () => {
               setDebugModalVisible(true);
+            }}
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title="Clear Transactions"
+            onPress={async () => {
+              await storeTransactions([]);
             }}
           />
         </View>
