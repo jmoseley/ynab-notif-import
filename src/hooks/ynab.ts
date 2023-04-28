@@ -70,7 +70,9 @@ const parseRevolut = (
 
   const amountPaid = notification.text.match(CURRENCY_REGEX);
 
-  const isNegative = amountPaid?.[1] === "-";
+  const isCashback = notification.title.includes("cashback");
+
+  const isNegative = amountPaid?.[1] === "-" || isCashback;
   const currency = amountPaid?.[2] || null;
   const amountStr = amountPaid?.[3] || null;
   if (!currency || !amountStr || !Currencies.some((c) => c === currency)) {
@@ -82,7 +84,7 @@ const parseRevolut = (
     date: new Date(parseInt(notification.time)).toISOString(),
     currency: currency as Currency,
     amount,
-    payee: notification.title,
+    payee: isCashback ? "Cashback" : notification.title,
   };
 };
 
@@ -92,7 +94,6 @@ const parseTest = (notification: NotificationPayload): Transaction | null => {
   }
 
   const amountPaid = notification.text.match(CURRENCY_REGEX);
-  console.log("amountPaid", amountPaid);
 
   const isNegative = amountPaid?.[1] === "-";
   const currency = amountPaid?.[2] || null;
