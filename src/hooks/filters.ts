@@ -32,10 +32,6 @@ const CALENDAR = {
   app: "com.google.android.calendar",
 };
 
-const SYSTEM = {
-  app: "android",
-};
-
 const CLASSDOJO = {
   app: "com.classdojo.android",
 };
@@ -47,7 +43,6 @@ const FILTERS: Filter[] = [
   GMAIL,
   WHATSAPP,
   CALENDAR,
-  SYSTEM,
   CLASSDOJO,
 ];
 
