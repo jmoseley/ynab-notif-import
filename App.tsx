@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import {
   AppRegistry,
   Button,
-  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -14,19 +13,33 @@ import {
 import RNAndroidNotificationListener, {
   RNAndroidNotificationListenerHeadlessJsName,
 } from "react-native-android-notification-listener";
-import * as Updates from "expo-updates";
+import Modal from "react-native-modalbox";
+import * as ExpoUpdates from "expo-updates";
 
-import {
-  notificationHandler,
-  NotificationPayload,
-} from "./src/hooks/notificationHandler";
-import { storeData, useAsyncStorage } from "./src/hooks/storage";
+import { notificationHandler } from "./src/hooks/notificationHandler";
+import { useAsyncStorage } from "./src/hooks/storage";
 import YnabConfigurationModal from "./src/components/ynabConfigurationModal";
 import DebugModal from "./src/components/debugModal";
 
 // const IS_PROD = Updates.manifest?.extra !== undefined;
 
 export default function App() {
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [reloading, setReloading] = useState(false);
+
+  ExpoUpdates.useUpdateEvents(async ({ type }) => {
+    if (type === ExpoUpdates.UpdateEventType.UPDATE_AVAILABLE) {
+      await ExpoUpdates.fetchUpdateAsync();
+      setUpdateModalOpen(true);
+    }
+  });
+
+  const reloadApp = async () => {
+    setReloading(true);
+    await ExpoUpdates.reloadAsync();
+    setReloading(false);
+  };
+
   useEffect(() => {
     (async () => {
       const status = await RNAndroidNotificationListener.getPermissionStatus();
@@ -60,6 +73,32 @@ export default function App() {
           setIsVisible={setDebugModalVisible}
         />
       )}
+      <Modal
+        position="bottom"
+        backButtonClose={true}
+        isOpen={updateModalOpen}
+        onClosed={() => setUpdateModalOpen(false)}
+        style={styles.updateModal}
+      >
+        <View style={styles.updateModalContainer}>
+          <Text>There is an update available for the app!</Text>
+          <View style={styles.buttonWrapper}>
+            <Button
+              disabled={reloading}
+              title="Reload App"
+              onPress={() => reloadApp()}
+            />
+          </View>
+          <View style={styles.modalButtonWrapper}>
+            <Button
+              disabled={reloading}
+              color="grey"
+              title="Cancel"
+              onPress={() => setUpdateModalOpen(false)}
+            />
+          </View>
+        </View>
+      </Modal>
       <View style={styles.buttonWrapper}>
         <View style={styles.button}>
           <Button
@@ -136,5 +175,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     flexWrap: "wrap",
     gap: 10,
+  },
+  updateModal: {
+    height: null as any,
+  },
+  updateModalContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 30,
+  },
+  modalButtonWrapper: {
+    width: "70%",
+    margin: 10,
   },
 });

@@ -70,8 +70,8 @@ const parseRevolut = (
 
   const amountPaid = notification.text.match(CURRENCY_REGEX);
 
-  const isCashback = notification.title.includes("cashback");
-  const isRefund = notification.title.includes("refund");
+  const isCashback = notification.title.toLowerCase().includes("cashback");
+  const isRefund = notification.title.toLowerCase().includes("refund");
 
   const isNegative = amountPaid?.[1] === "-" || isCashback || isRefund;
   const currency = amountPaid?.[2] || null;
