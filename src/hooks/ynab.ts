@@ -94,6 +94,10 @@ const parseTest = (notification: NotificationPayload): Transaction | null => {
     return null;
   }
 
+  if (notification.text.toLowerCase().includes("invite")) {
+    return null;
+  }
+
   const amountPaid = notification.text.match(CURRENCY_REGEX);
 
   const isNegative = amountPaid?.[1] === "-";
